@@ -1,0 +1,4 @@
+scc_selector_area:
+  css:
+    component:
+      css/scc-selector-area-widget.css: {}
