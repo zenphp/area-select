@@ -7,9 +7,14 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
+use Exception;
 
 /**
  * Defines the 'scc_selector_area' field type.
+ *
+ * @property string state
+ * @property string county
+ * @property string city
  *
  * @FieldType(
  *   id = "scc_selector_area",
@@ -28,12 +33,15 @@ class AreaItem extends FieldItemBase {
     if ($this->state !== NULL) {
       return FALSE;
     }
-    elseif ($this->county !== NULL) {
+
+    if ($this->county !== NULL) {
       return FALSE;
     }
-    elseif ($this->city !== NULL) {
+
+    if ($this->city !== NULL) {
       return FALSE;
     }
+
     return TRUE;
   }
 
@@ -55,7 +63,7 @@ class AreaItem extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
-  public static function schema(FieldStorageDefinitionInterface $field_definition) {
+  public static function schema(FieldStorageDefinitionInterface $field_definition): array {
 
     $columns = [
       'state' => [
@@ -83,7 +91,7 @@ class AreaItem extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
-  public static function generateSampleValue(FieldDefinitionInterface $field_definition) {
+  public static function generateSampleValue(FieldDefinitionInterface $field_definition): array {
 
     $random = new Random();
 
@@ -91,7 +99,11 @@ class AreaItem extends FieldItemBase {
 
     $values['county'] = array_rand(self::allowedCountyValues());
 
-    $values['city'] = $random->word(mt_rand(1, 255));
+    try {
+      $values['city'] = $random->word(random_int(1, 255));
+    } catch (Exception $e) {
+      $values['city'] = $random->word(mt_rand(1, 255));
+    }
 
     return $values;
   }
@@ -102,7 +114,7 @@ class AreaItem extends FieldItemBase {
    * @return array
    *   The list of allowed values.
    */
-  public static function allowedStateValues() {
+  public static function allowedStateValues(): array {
     return [
       'ny' => 'New York',
       'ct' => 'Connecticut',
@@ -113,10 +125,13 @@ class AreaItem extends FieldItemBase {
   /**
    * Returns allowed values for 'county' sub-field.
    *
+   * @param null $state
+   *   State ID.
+   *
    * @return array
    *   The list of allowed values.
    */
-  public static function allowedCountyValues($state = NULL) {
+  public static function allowedCountyValues($state = NULL): array {
     switch ($state) {
       case 'ny':
         return [

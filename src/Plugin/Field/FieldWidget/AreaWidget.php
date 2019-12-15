@@ -23,16 +23,16 @@ class AreaWidget extends WidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state): array {
 
     $parent = $items->getFieldDefinition()->getName();
     $inputs = $form_state->getUserInput();
     if ($inputs) {
       $input = $inputs[$parent][$delta];
-      $state_val = $input['state'] ?? (isset($items[$delta]->state) ? $items[$delta]->state : NULL);
+      $state_val = $input['state'] ?? ($items[$delta]->state ?? NULL);
     }
     else {
-      $state_val = isset($items[$delta]->state) ? $items[$delta]->state : NULL;
+      $state_val = $items[$delta]->state ?? NULL;
     }
 
     $wrapper = 'area-wrapper-' . $delta;
@@ -46,11 +46,11 @@ class AreaWidget extends WidgetBase {
         'callback' => [$this, 'updateCounties'],
         'wrapper' => $wrapper,
         'event' => 'change',
-        '#limit_validation_errors' => array(),
-      ]
+        '#limit_validation_errors' => [],
+      ],
     ];
 
-    $county_val = isset($items[$delta]->county) ? $items[$delta]->county : NULL;
+    $county_val = $items[$delta]->county ?? NULL;
     $allowedCountyValues = AreaItem::allowedCountyValues($state_val);
     $element['county'] = [
       '#type' => 'select',
@@ -62,7 +62,7 @@ class AreaWidget extends WidgetBase {
     $element['city'] = [
       '#type' => 'textfield',
       '#title' => $this->t('City'),
-      '#default_value' => isset($items[$delta]->city) ? $items[$delta]->city : NULL,
+      '#default_value' => $items[$delta]->city ?? NULL,
       '#size' => 20,
     ];
 
@@ -104,8 +104,7 @@ class AreaWidget extends WidgetBase {
   public function updateCounties(array $form, FormStateInterface $form_state) {
     $triggeringElement = $form_state->getTriggeringElement();
     $parents = array_slice($triggeringElement['#array_parents'], 0, -1);
-    $element = NestedArray::getValue($form, $parents);
-    return $element;
+    return NestedArray::getValue($form, $parents);
   }
 
 }
